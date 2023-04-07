@@ -1868,8 +1868,6 @@ The following imports will be affected by this deprecation:
 
 #### Examples
 
-In:
-
 ```jsx
 import { Table, TableBody, TableHeader, TableProps } from "@patternfly/react-table";
 ```
@@ -1883,6 +1881,22 @@ import {
  TableHeader as TableHeaderDeprecated,
  TableProps as TablePropsDeprecated
 } from '@patternfly/react-table/deprecated';
+```
+
+### table-rename-TableComposable [(#8892)](https://github.com/patternfly/patternfly-react/pull/8892)
+
+TableComposable has been renamed to Table.
+
+In:
+
+```jsx
+<TableComposable />
+```
+
+Out:
+
+```jsx
+<Table />
 ```
 
 ### table-warn-actionsColumn [(#8629)](https://github.com/patternfly/patternfly-react/pull/8629)

@@ -86,6 +86,7 @@ import { Td } from "@patternfly/react-table";
 
 const tdSelectTypeObj = {"disable": true};
 import { Table, TableBody, TableHeader, TableProps } from "@patternfly/react-table";
+import { TableComposable } from "@patternfly/react-table";
 
 //following type of import was causing errors for rules that checked specifiers before import package
 import foo from 'Bar';
@@ -187,10 +188,11 @@ const backgroundImgSrcObj: BackgroundImageSrcMap = {};
   <SelectToggle onToggle={} />
   <Slider onChange={foo => handler(foo)} />
   <Spinner isSVG />
-  <Td select={tdSelectTypeObj} actions={{disable: false}} />
   <Table />
+  <TableComposable>Body</TableComposable>
   <TableHeader />
   <TableBody />
+  <Td select={tdSelectTypeObj} actions={{disable: false}} />
   <Toggle isPrimary onToggle={} />
   <Tooltip reference />
   <TreeView hasCheck />
