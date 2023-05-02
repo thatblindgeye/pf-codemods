@@ -76,7 +76,7 @@ module.exports = {
             if (importedName === "TableComposable") {
               const tableName = importedName.replace(
                 "TableComposable",
-                "TableNew"
+                "Table"
               );
               const localName = node.local.name;
               const isAliased = importedName !== localName;
