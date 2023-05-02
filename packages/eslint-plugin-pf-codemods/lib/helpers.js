@@ -10,11 +10,23 @@ function moveSpecifiers(
 ) {
   return function (context) {
     const importNames = importsToMove.map((nameToMove) => nameToMove.name);
-    const importSpecifiersToMove = getPackageImports(
+    const fromPackageImports = getPackageImports(
       context,
       fromPackage,
       importNames
     );
+    const allElements = getAllJSXElements(context);
+    console.log(allElements[0]);
+    const importSpecifiersToMove = fromPackageImports.filter((fromImport) => {
+      const foundElement = allElements.find(
+        (el) => el?.openingElement?.name?.name === fromImport.local?.name
+      );
+      const hasDataAttr = foundElement?.openingElement.attributes?.find(
+        (attr) => attr.name.name === "data-codemods"
+      );
+
+      return (foundElement && !hasDataAttr) || !foundElement;
+    });
     if (!importSpecifiersToMove.length) return {};
 
     let modifiedToPackage = "";
@@ -23,9 +35,10 @@ function moveSpecifiers(
       const toParts = toPackage.split("/");
       //expecting @patternfly/{package}/dist/esm/components/{Component}/index.js
       //needing toPath to look like fromPath with the designator before /components
-      const fromParts = importSpecifiersToMove[0].parent.source.value.split("/");
+      const fromParts =
+        importSpecifiersToMove[0].parent.source.value.split("/");
       if (toParts[0] === "@patternfly" && toParts.length === 3) {
-        fromParts.splice(4, 0, toParts[2])
+        fromParts.splice(4, 0, toParts[2]);
         modifiedToPackage = fromParts.join("/");
       }
     }
@@ -42,7 +55,8 @@ function moveSpecifiers(
     const src = context.getSourceCode();
     const existingToPackageImportDeclaration = src.ast.body.find(
       (node) =>
-        node.type === "ImportDeclaration" && [modifiedToPackage, toPackage].includes(node.source.value)
+        node.type === "ImportDeclaration" &&
+        [modifiedToPackage, toPackage].includes(node.source.value)
     );
     const existingToPackageSpecifiers =
       existingToPackageImportDeclaration?.specifiers?.map((specifier) =>
@@ -54,7 +68,10 @@ function moveSpecifiers(
         const [newToPackageSpecifiers, fromPackageSpecifiers] =
           splitImportSpecifiers(node, importNames);
 
-        if (!newToPackageSpecifiers.length || !pfPackageMatches(fromPackage, node.source.value))
+        if (
+          !newToPackageSpecifiers.length ||
+          !pfPackageMatches(fromPackage, node.source.value)
+        )
           return {};
 
         const newAliasToPackageSpecifiers = createAliasImportSpecifiers(
@@ -193,13 +210,16 @@ function moveSpecifiers(
 
 function pfPackageMatches(packageName, nodeSrc) {
   const parts = packageName.split("/");
-  const regex = new RegExp('^' +
-    parts[0] + '\/' + parts[1] +
-    '(\/dist\/(esm|js))?' +
-    (parts[2] ? ('\/' + parts[2]) : '') +
-    '(\/(components|helpers)\/.*)?$'
+  const regex = new RegExp(
+    "^" +
+      parts[0] +
+      "/" +
+      parts[1] +
+      "(/dist/(esm|js))?" +
+      (parts[2] ? "/" + parts[2] : "") +
+      "(/(components|helpers)/.*)?$"
   );
-  return regex.test(nodeSrc)
+  return regex.test(nodeSrc);
 }
 
 /**
@@ -214,10 +234,10 @@ function getPackageImports(context, packageName, importNames = []) {
     .getSourceCode()
     .ast.body.filter((node) => node.type === "ImportDeclaration")
     .filter((node) => {
-      if(packageName.startsWith("@patternfly")) {
+      if (packageName.startsWith("@patternfly")) {
         return pfPackageMatches(packageName, node.source.value);
       }
-      return node.source.value === packageName
+      return node.source.value === packageName;
     })
     .map((node) => node.specifiers)
     .reduce((acc, val) => acc.concat(val), []);
@@ -592,10 +612,10 @@ function addCallbackParam(componentsArray, propMap) {
                     message: `The "${attribute.name.name}" prop for ${node.name.name} has been updated so that the "${newParam}" parameter is the first parameter. "${attribute.name.name}" handlers may require an update.`,
                     fix(fixer) {
                       const fixes = [];
-                      
+
                       const createParamAdditionFix = (params) => {
                         const firstParam = params[0];
-                        
+
                         const replacementParams = `${newParam}, ${context
                           .getSourceCode()
                           .getText(firstParam)}`;
