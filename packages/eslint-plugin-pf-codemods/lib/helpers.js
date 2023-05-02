@@ -16,7 +16,6 @@ function moveSpecifiers(
       importNames
     );
     const allElements = getAllJSXElements(context);
-    console.log(allElements[0]);
     const importSpecifiersToMove = fromPackageImports.filter((fromImport) => {
       const foundElement = allElements.find(
         (el) => el?.openingElement?.name?.name === fromImport.local?.name
